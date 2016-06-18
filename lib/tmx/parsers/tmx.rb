@@ -217,11 +217,16 @@ module Tmx
           points = object.xpath("polygon/@points").text.split(" ")
           { "shape" => "polygon", "points" => points }
         else
+          gid = object.xpath("@gid").text.to_i
           x = object.xpath("@x").text.to_i
           y = object.xpath("@y").text.to_i
           width = object.xpath("@width").text.to_i
           height = object.xpath("@height").text.to_i
-          { "shape" => "polygon", "points" => [ "#{x},#{y}", "#{x + width},#{y}", "#{x + width},#{y + height}", "#{x},#{y + height}" ] }
+          {
+            "gid" => gid,
+            "shape" => "polygon",
+            "points" => [ "#{x},#{y}", "#{x + width},#{y}", "#{x + width},#{y + height}", "#{x},#{y + height}" ]
+          }
         end
       end
 
