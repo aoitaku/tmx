@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.license       = "MIT"
 
   gem.add_dependency "multi_json", "~> 1.0"
-  gem.add_dependency "nokogiri", "~> 1.5"
+  gem.add_dependency "oga", "~> 2.2"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
