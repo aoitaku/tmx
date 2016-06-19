@@ -1,4 +1,4 @@
-require 'nokogiri'
+require 'oga'
 require 'zlib'
 require 'base64'
 
@@ -16,7 +16,7 @@ module Tmx
       end
 
       def parse(contents)
-        results = Nokogiri::XML(contents)
+        results = Oga.parse_xml(contents)
         convert_to_hash(results)
       end
 
@@ -30,7 +30,7 @@ module Tmx
           "height" => map_attr(xml,"height").to_i,
           "tilewidth" => map_attr(xml,"tilewidth").to_i,
           "tileheight" => map_attr(xml,"tileheight").to_i,
-          "properties" => properties(xml.xpath("/map")),
+          "properties" => properties(xml.xpath("/map").first),
           "layers" => map_layers(xml),
           "tilesets" => map_tilesets(xml),
           "object_groups" => map_object_groups(xml),
@@ -134,11 +134,12 @@ module Tmx
             this_dir = @options[:filename] ? File.dirname(@options[:filename]) : "."
             tileset_path = File.join(this_dir, source.text)
             contents = File.read(tileset_path)
-            results = Nokogiri::XML(contents)
-            tileset = results.xpath("tileset")
+            results = Oga.parse_xml(contents)
+            tileset = results.xpath("tileset").first
           end
 
-          image = tileset.xpath("image")
+          puts tileset
+          image = tileset.xpath("image").first
 
           properties = {
             "firstgid" => firstgid || tileset.xpath("@firstgid").text.to_i,
@@ -160,22 +161,25 @@ module Tmx
 
       def tileset_tiles(ts)
         ts.xpath("tile").map do |tile|
-	  terrain_str = tile.xpath("@terrain").text
+          terrain_str = tile.xpath("@terrain").text
           terrains = terrain_str.split(",",3).map { |s| s == "" ? nil : s.to_i }
 
-	  # Using image and properties like imageheight/imagetrans to match top level
-          image = tile.xpath("image")
+      	  # Using image and properties like imageheight/imagetrans to match top level
+          image = tile.xpath("image").first
 
-          {
+          result = {
             "id" => tile.xpath("@id").text.to_i,
             "terrain" => terrains,
             "probability" => tile.xpath("@probability").text.to_f,
-            "image" => image.xpath("@source").text,
-            "imageheight" => image.xpath("@height").text.to_i,
-            "imagewidth" => image.xpath("@width").text.to_i,
-            "imagetrans" => image.xpath("@trans").text,
             "properties" => properties(tile)
           }
+          if image
+            result["image"] = image.xpath("@source").text
+            result["imageheight"] = image.xpath("@height").text.to_i
+            result["imagewidth"] = image.xpath("@width").text.to_i
+            result["imagetrans"] = image.xpath("@trans").text
+          end
+          result
         end
       end
 
@@ -232,15 +236,14 @@ module Tmx
 
       def map_image_layers(xml)
         xml.xpath("map/imagelayer").map do |image_layer|
-          image = image_layer.xpath("image")
-
-          {
-            "image" => image.xpath("@source").text,
+          image = image_layer.xpath("image").first
+          result = {
             "name" => image_layer.xpath("@name").text,
             "width" => image_layer.xpath("@width").text.to_i,
             "height" => image_layer.xpath("@height").text.to_i
           }
-
+          result["image"] = image.xpath("@source").text if image
+          result
         end
       end
 
