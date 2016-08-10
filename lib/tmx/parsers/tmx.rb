@@ -138,7 +138,6 @@ module Tmx
             tileset = results.xpath("tileset").first
           end
 
-          puts tileset
           image = tileset.xpath("image").first
 
           properties = {
@@ -221,12 +220,14 @@ module Tmx
           points = object.xpath("polygon/@points").text.split(" ")
           { "shape" => "polygon", "points" => points }
         else
+          id = object.xpath("@id").text.to_i
           gid = object.xpath("@gid").text.to_i
           x = object.xpath("@x").text.to_i
           y = object.xpath("@y").text.to_i
           width = object.xpath("@width").text.to_i
           height = object.xpath("@height").text.to_i
           {
+            "id" => id,
             "gid" => gid,
             "shape" => "polygon",
             "points" => [ "#{x},#{y}", "#{x + width},#{y}", "#{x + width},#{y + height}", "#{x},#{y + height}" ]
