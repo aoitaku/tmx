@@ -211,17 +211,31 @@ module Tmx
       end
 
       def object_shape(object)
+        id = object.xpath("@id").text.to_i
+        gid = object.xpath("@gid").text.to_i
         if not object.xpath("ellipse").empty?
-          { "shape" => "ellipse" }
+          {
+            "id" => id,
+            "gid" => gid,
+            "shape" => "ellipse"
+          }
         elsif not object.xpath("polyline").empty?
           points = object.xpath("polyline/@points").text.split(" ")
-          { "shape" => "polyline", "points" => points }
+          {
+            "id" => id,
+            "gid" => gid,
+            "shape" => "polyline",
+            "points" => points
+          }
         elsif not object.xpath("polygon").empty?
           points = object.xpath("polygon/@points").text.split(" ")
-          { "shape" => "polygon", "points" => points }
+          {
+            "id" => id,
+            "gid" => gid,
+            "shape" => "polygon",
+            "points" => points
+          }
         else
-          id = object.xpath("@id").text.to_i
-          gid = object.xpath("@gid").text.to_i
           x = object.xpath("@x").text.to_i
           y = object.xpath("@y").text.to_i
           width = object.xpath("@width").text.to_i
